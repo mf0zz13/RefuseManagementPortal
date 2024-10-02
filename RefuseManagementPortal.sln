@@ -5,6 +5,10 @@ VisualStudioVersion = 17.12.35309.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefuseManagementPortal", "RefuseManagementPortal.csproj", "{018C5A1D-708A-44C4-A6EA-35E84D9BDB85}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ManagementPortal", "ManagementPortal", "{A5266D42-6343-42D4-B14C-96E9FCBE8BE0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{113A89C7-6551-4CB3-895D-8FAD5B410988}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +22,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{018C5A1D-708A-44C4-A6EA-35E84D9BDB85} = {A5266D42-6343-42D4-B14C-96E9FCBE8BE0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {14E1259D-0FAB-47AE-BC22-7AF23A74D503}
