@@ -3,10 +3,9 @@
 @using RefuseManagementPortal.Service;
 @using RefuseManagementPortal.Models;
 @using System.Net.Http.Json;
-@inject HttpClient client;
 
-<MudGrid Spacing="200">
-    <MudItem xs="6">
+<MudGrid Spacing="10">
+    <MudItem lg="6">
         <MudCard Class="d-flex align-center justify-center mud-width-full py-8"
                  Elevation="8">
             <MudCardHeader>
@@ -23,19 +22,30 @@
         </MudCard>
     </MudItem>
 
-    <MudItem xs="6">
-        <MudStack Class="d-flex align-center justify-end mud-width-full py-8">
-            @foreach (var item in testList)
-            {
-                <MudCard>
-                    <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText>@($"{item.date}\n{item.temperatureC}\n{item.temperatureF}\n{item.summary}") </MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-            </MudCard>
+    <MudItem lg="6">
+        <MudGrid Justify="Justify.FlexStart"
+                 Spacing="10">
+            @if (!(testList is null))
+            {            @foreach (var record in testList)
+                {
+                    <MudItem lg="6">
+                        <MudCard Class="d-flex align-center justify-end mud-width-full py-8"
+                                 Elevation="8">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText>Truck Number: @record.truckNumber</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudText>Service Area: @record.serviceArea</MudText>
+                                <MudText>Route: @record.route</MudText>
+                                <MudText>Refuse Type: @record.refuseType</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
             }
-        </MudStack>
+        </MudGrid>
     </MudItem>
 </MudGrid>
 
@@ -49,7 +59,7 @@
 @code {
 
     // Fields
-    private List<Weather>? testList;
+    private List<DispatchRecord> testList;
     private DataBaseConnection connection = new();
 
     // Properties
@@ -67,30 +77,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        testList = await GetWeatherAsync();
+        testList = await connection.GetDispatchRecordsAsync();
     }
 
-    async Task<List<Weather>> GetWeatherAsync()
-    {
 
-        const string _baseUrl = @"https://webapplication1apimanagementservice.azure-api.net";
-        const string _newsEndpoint = "WeatherForecast";
-
-        return await client.GetFromJsonAsync<List<Weather>>(@"https://webapplication1apimanagementservice.azure-api.net/weatherforecast") ?? new List<Weather>();
-        
-        // HttpClient httpClient = new();
-
-        // var response = await httpClient.GetFromJsonAsync<List<Weather>>("https://webapplication1apimanagementservice.azure-api.net/WeatherForecast");
-
-        // return response;
-    }
-
-    public struct Weather
-    {
-        public DateTime date { get; set; }
-        public int temperatureC { get; set; }
-        public int temperatureF { get; set; }
-        public required string summary { get; set; }
-    }
 
 }

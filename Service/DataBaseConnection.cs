@@ -5,7 +5,7 @@ namespace RefuseManagementPortal.Service
 {
     public class DataBaseConnection
     {
-        public async Task<List<Test>> GetDispatchRecords()
+        public async Task<List<DispatchRecord>> GetDispatchRecordsAsync()
         {
             HttpClient client = new();
             const string _baseUrl = @"https://guntherrefusedispatchapi.azurewebsites.net/";
@@ -13,8 +13,7 @@ namespace RefuseManagementPortal.Service
 
             client.BaseAddress = new Uri(_baseUrl);
 
-            var result = await client.GetFromJsonAsync<List<Test>>(_newsEndpoint);
-            return result;
+            return await client.GetFromJsonAsync<List<DispatchRecord>>(_newsEndpoint) ?? new List<DispatchRecord>();
         }
     }
 }
