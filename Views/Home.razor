@@ -23,43 +23,41 @@
     </MudItem>
 
     <MudItem lg="6">
-        <MudGrid Justify="Justify.FlexStart"
-                 Spacing="10">
-            @if (!(testList is null))
-            {            @foreach (var record in testList)
+        <MudCard Class="d-flex align-center justify-center mud-width-full py-8 px-5 pe-5"
+                 Elevation="8">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h3">Dispatched Trucks</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudGrid Justify="Justify.FlexStart"
+                     Spacing="10">
+                @if (!(testList is null))
                 {
-                    <MudItem lg="6">
-                        <MudCard Class="d-flex align-center justify-end mud-width-full py-8"
-                                 Elevation="8">
-                            <MudCardHeader>
-                                <CardHeaderContent>
+                    @foreach (var record in testList)
+                    {
+                        <MudItem lg="6">
+                            <MudCard Elevation="8"
+                                     Style="background-color: #56706f; border: solid; border-color:white; color:white;">
+                                <MudCardContent>
                                     <MudText>Truck Number: @record.truckNumber</MudText>
-                                </CardHeaderContent>
-                            </MudCardHeader>
-                            <MudCardContent>
-                                <MudText>Service Area: @record.serviceArea</MudText>
-                                <MudText>Route: @record.route</MudText>
-                                <MudText>Refuse Type: @record.refuseType</MudText>
-                            </MudCardContent>
-                        </MudCard>
-                    </MudItem>
+                                    <MudText>Service Area: @record.serviceArea</MudText>
+                                    <MudText>Route: @record.route</MudText>
+                                    <MudText>Refuse Type: @record.refuseType</MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
                 }
-            }
-        </MudGrid>
+            </MudGrid>
+        </MudCard>
     </MudItem>
 </MudGrid>
 
-
-
-
-
-
-
-    Welcome to your new app.🚛
 @code {
 
     // Fields
-    private List<DispatchRecord> testList;
+    private List<DispatchRecord>? testList;
     private DataBaseConnection connection = new();
 
     // Properties
@@ -77,8 +75,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        testList = await connection.GetDispatchRecordsAsync();
+        testList = await connection.GetDispatchRecordsAsync("AllDispatchRecordsFromToday");
     }
+
+    
 
 
 
