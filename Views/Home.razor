@@ -1,5 +1,9 @@
 ﻿@page "/"
 @using MudBlazor;
+@using RefuseManagementPortal.Service;
+@using RefuseManagementPortal.Models;
+@using System.Net.Http.Json;
+@inject HttpClient client;
 
 <MudGrid Spacing="200">
     <MudItem xs="6">
@@ -21,16 +25,21 @@
 
     <MudItem xs="6">
         <MudStack Class="d-flex align-center justify-end mud-width-full py-8">
-            <MudCard>
-                <MudCardHeader>
+            @foreach (var item in testList)
+            {
+                <MudCard>
+                    <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h3"></MudText>
+                        <MudText>@($"{item.date}\n{item.temperatureC}\n{item.temperatureF}\n{item.summary}") </MudText>
                     </CardHeaderContent>
                 </MudCardHeader>
             </MudCard>
+            }
         </MudStack>
     </MudItem>
 </MudGrid>
+
+
 
 
 
@@ -40,10 +49,11 @@
 @code {
 
     // Fields
-
+    private List<Weather>? testList;
+    private DataBaseConnection connection = new();
 
     // Properties
-    
+
 
     private double[] data = { (100 / 25) * 12, (100 / 25) * 8, (100 / 25) * 4 };
     private string[] labels = { "Available", "Dispatched", "Need Maintenance" };
@@ -54,4 +64,33 @@
         {
             ChartPalette = new string[] { "#009112", "#cc9801", "#e20000" }
         };
+
+    protected override async Task OnInitializedAsync()
+    {
+        testList = await GetWeatherAsync();
+    }
+
+    async Task<List<Weather>> GetWeatherAsync()
+    {
+
+        const string _baseUrl = @"https://webapplication1apimanagementservice.azure-api.net";
+        const string _newsEndpoint = "WeatherForecast";
+
+        return await client.GetFromJsonAsync<List<Weather>>(@"https://webapplication1apimanagementservice.azure-api.net/weatherforecast") ?? new List<Weather>();
+        
+        // HttpClient httpClient = new();
+
+        // var response = await httpClient.GetFromJsonAsync<List<Weather>>("https://webapplication1apimanagementservice.azure-api.net/WeatherForecast");
+
+        // return response;
+    }
+
+    public struct Weather
+    {
+        public DateTime date { get; set; }
+        public int temperatureC { get; set; }
+        public int temperatureF { get; set; }
+        public required string summary { get; set; }
+    }
+
 }
