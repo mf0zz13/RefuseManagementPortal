@@ -1,6 +1,6 @@
 ﻿namespace RefuseManagementPortal.Models
 {
-    public class Test
+    public class DispatchRecord
     {
         public required DateTime date { get; set; }
         public required string serviceArea { get; set; }

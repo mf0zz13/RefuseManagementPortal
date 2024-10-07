@@ -3,10 +3,9 @@
 @using RefuseManagementPortal.Service;
 @using RefuseManagementPortal.Models;
 @using System.Net.Http.Json;
-@inject HttpClient client;
 
-<MudGrid Spacing="200">
-    <MudItem xs="6">
+<MudGrid Spacing="10">
+    <MudItem lg="6">
         <MudCard Class="d-flex align-center justify-center mud-width-full py-8"
                  Elevation="8">
             <MudCardHeader>
@@ -17,48 +16,55 @@
             <MudChart ChartType="MudBlazor.ChartType.Donut" ChartOptions="chartColors" InputData="@data" InputLabels="@labels">
                 <CustomGraphics>
                     <text class="donut-inner-text" x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="3">Available Trucks</text>
-                    <text class="donut-inner-text" x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@availableTrucks</text>
+                    <text class="donut-inner-text" x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@truckCount</text>
                 </CustomGraphics>
             </MudChart>
         </MudCard>
     </MudItem>
 
-    <MudItem xs="6">
-        <MudStack Class="d-flex align-center justify-end mud-width-full py-8">
-            @foreach (var item in testList)
-            {
-                <MudCard>
-                    <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText>@($"{item.date}\n{item.temperatureC}\n{item.temperatureF}\n{item.summary}") </MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-            </MudCard>
-            }
-        </MudStack>
+    <MudItem lg="6">
+        <MudCard Class="d-flex align-center justify-center mud-width-full py-8 px-5 pe-5"
+                 Elevation="8">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h3">Dispatched Trucks</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudGrid Justify="Justify.FlexStart"
+                     Spacing="10">
+                @if (!(dispatchList is null))
+                {
+                    @foreach (var record in dispatchList)
+                    {
+                        <MudItem lg="6">
+                            <MudCard Elevation="8"
+                                     Style="background-color: #56706f; border: solid; border-color:white; color:white;">
+                                <MudCardContent>
+                                    <MudText>Truck Number: @record.truckNumber</MudText>
+                                    <MudText>Service Area: @record.serviceArea</MudText>
+                                    <MudText>Route: @record.route</MudText>
+                                    <MudText>Refuse Type: @record.refuseType</MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                }
+            </MudGrid>
+        </MudCard>
     </MudItem>
 </MudGrid>
 
-
-
-
-
-
-
-    Welcome to your new app.🚛
 @code {
 
     // Fields
-    private List<Weather>? testList;
+    private List<DispatchRecord>? dispatchList;
+    private List<Truck>? truckList;
     private DataBaseConnection connection = new();
+    private double truckCount;
 
     // Properties
-
-
-    private double[] data = { (100 / 25) * 12, (100 / 25) * 8, (100 / 25) * 4 };
+    private double[] data = new double[3];
     private string[] labels = { "Available", "Dispatched", "Need Maintenance" };
-
-    private int availableTrucks = 12;
 
     MudBlazor.ChartOptions chartColors = new()
         {
@@ -67,30 +73,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        testList = await GetWeatherAsync();
+        dispatchList = await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecordsFromToday");
+        truckList = await connection.GetRecordAsync<Truck>("AllTrucks");
+        truckCount = Convert.ToDouble(truckList.Count());
+
+        double dispatchedCount = Convert.ToDouble(dispatchList.Count());
+        double trucksNeedService = Convert.ToDouble(truckList.Count(x => x.NeedMaintenance == true));
+
+        data[1] = dispatchedCount / truckCount;
+        data[2] = trucksNeedService / truckCount;
+        data[0] = (truckCount - (dispatchedCount + trucksNeedService)) / truckCount;
+
     }
 
-    async Task<List<Weather>> GetWeatherAsync()
-    {
 
-        const string _baseUrl = @"https://webapplication1apimanagementservice.azure-api.net";
-        const string _newsEndpoint = "WeatherForecast";
 
-        return await client.GetFromJsonAsync<List<Weather>>(@"https://webapplication1apimanagementservice.azure-api.net/weatherforecast") ?? new List<Weather>();
-        
-        // HttpClient httpClient = new();
 
-        // var response = await httpClient.GetFromJsonAsync<List<Weather>>("https://webapplication1apimanagementservice.azure-api.net/WeatherForecast");
-
-        // return response;
-    }
-
-    public struct Weather
-    {
-        public DateTime date { get; set; }
-        public int temperatureC { get; set; }
-        public int temperatureF { get; set; }
-        public required string summary { get; set; }
-    }
 
 }
