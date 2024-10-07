@@ -32,9 +32,9 @@
             </MudCardHeader>
             <MudGrid Justify="Justify.FlexStart"
                      Spacing="10">
-                @if (!(testList is null))
+                @if (!(dispatchList is null))
                 {
-                    @foreach (var record in testList)
+                    @foreach (var record in dispatchList)
                     {
                         <MudItem lg="6">
                             <MudCard Elevation="8"
@@ -57,16 +57,14 @@
 @code {
 
     // Fields
-    private List<DispatchRecord>? testList;
+    private List<DispatchRecord>? dispatchList;
+    private List<Truck>? truckList;
     private DataBaseConnection connection = new();
+    private double availableTrucks;
 
     // Properties
-
-
-    private double[] data = { (100 / 25) * 12, (100 / 25) * 8, (100 / 25) * 4 };
+    private double[] data = new double[3];
     private string[] labels = { "Available", "Dispatched", "Need Maintenance" };
-
-    private int availableTrucks = 12;
 
     MudBlazor.ChartOptions chartColors = new()
         {
@@ -75,10 +73,27 @@
 
     protected override async Task OnInitializedAsync()
     {
-        testList = await connection.GetDispatchRecordsAsync("AllDispatchRecordsFromToday");
+        dispatchList = await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecordsFromToday");
+        truckList = await connection.GetRecordAsync<Truck>("AllTrucks");
+        availableTrucks = Convert.ToDouble(truckList.Count());
+        bool readyForCalculation = false;
+
+        do
+        {
+            if (dispatchList is not null && truckList is not null)
+            {
+                readyForCalculation = true;
+                double dispatchedCount = Convert.ToDouble(dispatchList.Count());
+                double trucksNeedService = Convert.ToDouble((truckList.Where(x => x.NeedMaintenance == true)).Count());
+
+                data[1] = dispatchedCount / availableTrucks;
+                data[2] = trucksNeedService / availableTrucks;
+                data[0] = (availableTrucks - (dispatchedCount + trucksNeedService)) / availableTrucks;
+            }
+        } while (!readyForCalculation);
     }
 
-    
+
 
 
 
