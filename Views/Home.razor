@@ -16,7 +16,7 @@
             <MudChart ChartType="MudBlazor.ChartType.Donut" ChartOptions="chartColors" InputData="@data" InputLabels="@labels">
                 <CustomGraphics>
                     <text class="donut-inner-text" x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="3">Available Trucks</text>
-                    <text class="donut-inner-text" x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@availableTrucks</text>
+                    <text class="donut-inner-text" x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="5">@truckCount</text>
                 </CustomGraphics>
             </MudChart>
         </MudCard>
@@ -60,7 +60,7 @@
     private List<DispatchRecord>? dispatchList;
     private List<Truck>? truckList;
     private DataBaseConnection connection = new();
-    private double availableTrucks;
+    private double truckCount;
 
     // Properties
     private double[] data = new double[3];
@@ -75,22 +75,15 @@
     {
         dispatchList = await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecordsFromToday");
         truckList = await connection.GetRecordAsync<Truck>("AllTrucks");
-        availableTrucks = Convert.ToDouble(truckList.Count());
-        bool readyForCalculation = false;
+        truckCount = Convert.ToDouble(truckList.Count());
 
-        do
-        {
-            if (dispatchList is not null && truckList is not null)
-            {
-                readyForCalculation = true;
-                double dispatchedCount = Convert.ToDouble(dispatchList.Count());
-                double trucksNeedService = Convert.ToDouble((truckList.Where(x => x.NeedMaintenance == true)).Count());
+        double dispatchedCount = Convert.ToDouble(dispatchList.Count());
+        double trucksNeedService = Convert.ToDouble(truckList.Count(x => x.NeedMaintenance == true));
 
-                data[1] = dispatchedCount / availableTrucks;
-                data[2] = trucksNeedService / availableTrucks;
-                data[0] = (availableTrucks - (dispatchedCount + trucksNeedService)) / availableTrucks;
-            }
-        } while (!readyForCalculation);
+        data[1] = dispatchedCount / truckCount;
+        data[2] = trucksNeedService / truckCount;
+        data[0] = (truckCount - (dispatchedCount + trucksNeedService)) / truckCount;
+
     }
 
 
