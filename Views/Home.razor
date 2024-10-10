@@ -2,7 +2,6 @@
 @using MudBlazor;
 @using RefuseManagementPortal.Service;
 @using RefuseManagementPortal.Models;
-@using System.Net.Http.Json;
 
 <MudGrid Spacing="10">
     <MudItem lg="6">
@@ -40,10 +39,10 @@
                             <MudCard Elevation="8"
                                      Style="background-color: #56706f; border: solid; border-color:white; color:white;">
                                 <MudCardContent>
-                                    <MudText>Truck Number: @record.truckNumber</MudText>
-                                    <MudText>Service Area: @record.serviceArea</MudText>
-                                    <MudText>Route: @record.route</MudText>
-                                    <MudText>Refuse Type: @record.refuseType</MudText>
+                                    <MudText>Truck Number: @record.TruckNumber</MudText>
+                                    <MudText>Service Area: @record.ServiceArea</MudText>
+                                    <MudText>Route: @record.Route</MudText>
+                                    <MudText>Refuse Type: @record.RefuseType</MudText>
                                 </MudCardContent>
                             </MudCard>
                         </MudItem>
@@ -52,7 +51,82 @@
             </MudGrid>
         </MudCard>
     </MudItem>
+
+    <MudItem lg="6">
+        <MudDataGrid Items="@dateList"
+                     Class="py-8 px-5 pe-5"
+                     Elevation="8">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Dispatch Records</MudText>
+                <MudSpacer />
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => x" Title="Date" />
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudButton OnClick="@(() => ViewRecord(context.Item))"
+                                       Size="@MudBlazor.Size.Small"
+                                       Variant="@Variant.Filled"
+                                       Style="background-color: #56706f;
+                                              color: white;">
+                                View Records
+                            </MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </MudItem>
 </MudGrid>
+<MudPopover Open="@Open"
+            Paper="true"
+            Elevation="8"
+            AnchorOrigin="Origin.CenterCenter"
+            TransformOrigin="Origin.TopCenter">
+    <MudCard Class="d-flex align-center justify-center mud-width-full py-8 px-5 pe-5"
+             Elevation="8">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h3">@($"Dispatch Records for {SelectedDate.Month}/{SelectedDate.Day}/{SelectedDate.Year}") </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudGrid Justify="Justify.FlexStart"
+                 Spacing="10">
+            @if (!(filteredList is null))
+            {
+                @foreach (var record in filteredList)
+                {
+                    <MudItem lg="6">
+                        <MudCard Elevation="8"
+                                 Style="background-color: #56706f; border: solid; border-color:white; color:white;">
+                            <MudCardContent>
+                                <MudText>Truck Number: @record.TruckNumber</MudText>
+                                <MudText>Service Area: @record.ServiceArea</MudText>
+                                <MudText>Route: @record.Route</MudText>
+                                <MudText>Refuse Type: @record.RefuseType</MudText>
+                                <MudText>Driver: @((employeeList.Where(x => x.EmployeeID == record.Driver).Select(x => $"{x.FirstName} {x.LastName}")).First())</MudText>
+                                <MudText>Helper: @((employeeList.Where(x => x.EmployeeID == record.HelperOne).Select(x => $"{x.FirstName} {x.LastName}")).First())</MudText>
+                                @if (record.HelperTwo is not null)
+                                {
+                                    <MudText>Helper: @((employeeList.Where(x => x.EmployeeID == record.HelperTwo).Select(x => $"{x.FirstName} {x.LastName}")).First())</MudText>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            }
+        </MudGrid>
+        <MudButton OnClick="@(() => Open = false)"
+                   Size="@MudBlazor.Size.Small"
+                   Variant="@Variant.Filled"
+                   Style="background-color: #56706f;
+                          color: white;"
+                   class="mt-3">
+            Close
+        </MudButton>
+    </MudCard>
+</MudPopover>
 
 @code {
 
@@ -61,10 +135,15 @@
     private List<Truck>? truckList;
     private DataBaseConnection connection = new();
     private double truckCount;
+    private List<Employee>? employeeList;
+    private List<string>? dateList;
+    private List<DispatchRecord>? filteredList;
 
     // Properties
     private double[] data = new double[3];
     private string[] labels = { "Available", "Dispatched", "Need Maintenance" };
+    private bool Open { get; set; }
+    private DateTime SelectedDate { get; set; }
 
     MudBlazor.ChartOptions chartColors = new()
         {
@@ -73,9 +152,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        dispatchList = await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecordsFromToday");
+        Open = false;
+        dispatchList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecords")).Where(x => x.DispatchDate.Date == DateTime.Today).ToList();
         truckList = await connection.GetRecordAsync<Truck>("AllTrucks");
+        dateList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecords")).Select(x => $"{x.DispatchDate.Month}/{x.DispatchDate.Day}/{x.DispatchDate.Year}").Distinct().ToList();
+        employeeList = await connection.GetRecordAsync<Employee>("AllEmployees");
         truckCount = Convert.ToDouble(truckList.Count());
+
 
         double dispatchedCount = Convert.ToDouble(dispatchList.Count());
         double trucksNeedService = Convert.ToDouble(truckList.Count(x => x.NeedMaintenance == true));
@@ -83,7 +166,14 @@
         data[1] = dispatchedCount / truckCount;
         data[2] = trucksNeedService / truckCount;
         data[0] = (truckCount - (dispatchedCount + trucksNeedService)) / truckCount;
+    }
+    private async Task ViewRecord(string Date)
+    {
+        Open = true;
 
+        SelectedDate = DateTime.Parse(Date);
+
+        filteredList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecords")).Where(x => x.DispatchDate == SelectedDate).ToList();
     }
 
 
