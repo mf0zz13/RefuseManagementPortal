@@ -1,14 +1,16 @@
-﻿namespace RefuseManagementPortal.Models
+﻿using System.Data.SqlTypes;
+
+namespace RefuseManagementPortal.Models
 {
     public class DispatchRecord
     {
-        public required DateTime date { get; set; }
-        public required string serviceArea { get; set; }
-        public required string route { get; set; }
-        public required string truckNumber { get; set; }
-        public required string driver { get; set; }
-        public required string helperOne { get; set; }
-        public string? helperTwo { get; set; }
-        public required string refuseType { get; set; }
+        public required DateTime DispatchDate { get; set; }
+        public required string ServiceArea { get; set; }
+        public required string Route { get; set; }
+        public required string TruckNumber { get; set; }
+        public required string Driver { get; set; }
+        public required string HelperOne { get; set; }
+        public string? HelperTwo { get; set; }
+        public required string RefuseType { get; set; }
     }
 }
