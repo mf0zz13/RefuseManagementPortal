@@ -175,9 +175,4 @@
 
         filteredList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecords")).Where(x => x.DispatchDate == SelectedDate).ToList();
     }
-
-
-
-
-
 }
