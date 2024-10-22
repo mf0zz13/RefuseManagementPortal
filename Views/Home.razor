@@ -153,7 +153,7 @@
     protected override async Task OnInitializedAsync()
     {
         Open = false;
-        dispatchList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecords")).Where(x => x.DispatchDate.Date == DateTime.Today).ToList();
+        dispatchList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecordsFromToday")).ToList();
         truckList = await connection.GetRecordAsync<Truck>("AllTrucks");
         dateList = (await connection.GetRecordAsync<DispatchRecord>("AllDispatchRecords")).Select(x => $"{x.DispatchDate.Month}/{x.DispatchDate.Day}/{x.DispatchDate.Year}").Distinct().ToList();
         employeeList = await connection.GetRecordAsync<Employee>("AllEmployees");
