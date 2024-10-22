@@ -1,6 +1,7 @@
 ﻿using RefuseManagementPortal.Models;
 using System.Net;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 
 namespace RefuseManagementPortal.Service
 {
@@ -8,7 +9,7 @@ namespace RefuseManagementPortal.Service
     {
         private readonly HttpClient client = new()
         {
-            BaseAddress = new Uri(@"https://guntherrefusedispatchapi.azurewebsites.net/DispatchRecord/")
+            BaseAddress = new Uri(Environment.GetEnvironmentVariable("APIConnectionString").ToString())
         };
         public async Task<List<T>> GetRecordAsync<T>(string endPoint)
         {
