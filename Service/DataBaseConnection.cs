@@ -7,7 +7,7 @@ namespace RefuseManagementPortal.Service
 {
     public class DataBaseConnection
     {
-        private static string uri = System.Environment.GetEnvironmentVariable("APIConnectionString");
+        private static string uri = "https://guntherrefusedispatchapi.azurewebsites.net/DispatchRecord/";
         private readonly HttpClient client = new()
         {
             BaseAddress = new Uri(uri)
