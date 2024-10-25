@@ -7,9 +7,10 @@ namespace RefuseManagementPortal.Service
 {
     public class DataBaseConnection
     {
+        private static string uri = System.Environment.GetEnvironmentVariable("APIConnectionString");
         private readonly HttpClient client = new()
         {
-            BaseAddress = new Uri(Environment.GetEnvironmentVariable("APIConnectionString", EnvironmentVariableTarget.Process))
+            BaseAddress = new Uri(uri)
         };
         public async Task<List<T>> GetRecordAsync<T>(string endPoint)
         {
